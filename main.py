@@ -4,15 +4,11 @@ import time
 from pathlib import Path
 import requests
 
-# -------------------------
-# Config
-# -------------------------
-STATE_FILE = Path("./data/user_state.json")  # Store state file in data subdirectory
-
-# Local URL – adjust to your setup
+# Initial Setup
+STATE_FILE = Path("./data/user_state.json")
 BASE_URL = os.getenv("LINKWARDEN_URL", "http://linkwarden:3000")
 API_TOKEN = os.getenv("LINKWARDEN_TOKEN")
-ROOT_COLLECTION_ID = os.getenv("ROOT_COLLECTION_ID")
+ROOT_COLLECTION_ID = os.getenv("ROOT_COLLECTION_ID") # From the URL of the collection
 
 # Validate environment variables
 if not API_TOKEN or not API_TOKEN.strip():
@@ -29,10 +25,7 @@ HEADERS = {
     "Content-Type": "application/json",
 }
 
-# -------------------------
 # Helpers
-# -------------------------
-
 def load_or_init_state():
     # Ensure the data directory exists
     STATE_FILE.parent.mkdir(exist_ok=True)
@@ -51,10 +44,7 @@ def atomic_write_state(state):
         print(f"Failed to write state to {tmp_file}: {e}")
         raise
 
-# -------------------------
 # API functions
-# -------------------------
-
 def fetch_all_user_ids():
     url = f"{BASE_URL}/api/v1/users"
     try:
@@ -155,10 +145,6 @@ def ensure_permissions(user_id, collection_id, full_access):
         print(f"Error updating collection {collection_id}: {e}")
         raise
 
-# -------------------------
-# Main loop
-# -------------------------
-
 def main():
     while True:
         state = load_or_init_state()
@@ -182,7 +168,7 @@ def main():
         else:
             print("No new users")
 
-        time.sleep(int(os.getenv("POLL_INTERVAL", "60")))  # default: 60s
+        time.sleep(int(os.getenv("POLL_INTERVAL", "60")))  # interval: 60s
 
 if __name__ == "__main__":
     main()
